@@ -18,11 +18,13 @@ var numGoRoutines int
 var column int
 var geoipDbPath string
 var outputDir string
+var outputPrefix string
 var wg = sync.WaitGroup{}
 
 func init() {
 	flag.StringVar(&geoipDbPath, "d", "", "GeoIP data file")
 	flag.StringVar(&outputDir, "o", "", "Output directory")
+	flag.StringVar(&outputPrefix, "prefix", "out", "Outputfile prefix")
 	flag.IntVar(&numGoRoutines, "r", 3, "Number of goroutines to execute queries.")
 	flag.IntVar(&column, "c", -1, "IP Address column.")
 }
@@ -73,7 +75,7 @@ func main() {
 	pipe := make(chan []string)
 
 	for i := 0; i < numGoRoutines; i++ {
-		go convIp2Country(fmt.Sprintf("/Users/paydro/code/go/src/github.com/8tracks/ip2country/output/out%d", i), pipe)
+		go convIp2Country(fmt.Sprintf("%s/%s%d", outputDir, outputPrefix, i), pipe)
 	}
 
 	for {
