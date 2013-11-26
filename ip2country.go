@@ -15,6 +15,7 @@ import (
 
 const BATCHSIZE = 1000
 var numGoRoutines int
+var column int
 var geoipDbPath string
 var outputDir string
 var wg = sync.WaitGroup{}
@@ -23,7 +24,7 @@ func init() {
 	flag.StringVar(&geoipDbPath, "d", "", "GeoIP data file")
 	flag.StringVar(&outputDir, "o", "", "Output directory")
 	flag.IntVar(&numGoRoutines, "r", 3, "Number of goroutines to execute queries.")
-	flag.IntVar(&column, "c", 3, "IP Address column.")
+	flag.IntVar(&column, "c", -1, "IP Address column.")
 }
 
 func convIp2Country(outFilePath string, pipe chan []string) {
@@ -47,9 +48,9 @@ func convIp2Country(outFilePath string, pipe chan []string) {
 			parts := strings.Split(line, "|")
 			country, _ := gdb.GetCountry(parts[4])
 			if country != "" {
-				parts[4] = country
+				parts[column] = country
 			} else {
-				parts[4] = "--"
+				parts[column] = "--"
 			}
 			out.WriteString(strings.Join(parts, "|"))
 		}
@@ -60,6 +61,11 @@ func convIp2Country(outFilePath string, pipe chan []string) {
 
 func main() {
 	flag.Parse()
+	if geoipDbPath == "" || outputDir == "" || column == -1 {
+		flag.Usage()
+		os.Exit(1)
+	}
+
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	input := bufio.NewReader(os.Stdin)
