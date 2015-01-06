@@ -30,7 +30,8 @@ func init() {
 }
 
 func convIp2Country(outFilePath string, pipe chan []string) {
-
+	defer wg.Done()
+	
 	log.Printf("Starting up converter ... %s", geoipDbPath)
 
 	gdb, err := geoip.Open(geoipDbPath)
@@ -75,6 +76,7 @@ func main() {
 	pipe := make(chan []string)
 
 	for i := 0; i < numGoRoutines; i++ {
+		wg.Add(1)
 		go convIp2Country(fmt.Sprintf("%s/%s%d", outputDir, outputPrefix, i), pipe)
 	}
 
