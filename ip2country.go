@@ -31,7 +31,7 @@ func init() {
 
 func convIp2Country(outFilePath string, pipe chan []string) {
 	defer wg.Done()
-	
+
 	log.Printf("Starting up converter ... %s", geoipDbPath)
 
 	gdb, err := geoip.Open(geoipDbPath)
@@ -49,7 +49,7 @@ func convIp2Country(outFilePath string, pipe chan []string) {
 	for lines := range pipe {
 		for _, line := range lines {
 			parts := strings.Split(line, "|")
-			country, _ := gdb.GetCountry(parts[4])
+			country, _ := gdb.GetCountry(parts[column])
 			if country != "" {
 				parts[column] = country
 			} else {
@@ -58,6 +58,8 @@ func convIp2Country(outFilePath string, pipe chan []string) {
 			out.WriteString(strings.Join(parts, "|"))
 		}
 	}
+
+	out.Sync()
 
 	wg.Done()
 }
