@@ -55,13 +55,10 @@ func convIp2Country(outFilePath string, pipe chan []string) {
 			} else {
 				parts[column] = "--"
 			}
+
 			out.WriteString(strings.Join(parts, "|"))
 		}
 	}
-
-	out.Sync()
-
-	wg.Done()
 }
 
 func main() {
